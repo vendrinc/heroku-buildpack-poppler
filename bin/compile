@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+BUILDPACK_DIR="$(dirname "$(dirname "$0")")"
+BUILD_DIR="$1"
+
+# fail fast
+set -eo pipefail
+
+function topic() {
+  echo "-----> $*"
+}
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+POPPLER_VERSION="21.08.0"
+
+POPPLER_BUILD_DIR="$BUILD_DIR/.heroku/poppler"
+
+mkdir $POPPLER_BUILD_DIR
+
+topic "Fetching Poppler $POPPLER_VERSION"
+
+curl -sL -O https://poppler.freedesktop.org/poppler-$POPPLER_VERSION.tar.xz | indent
+tar -xf poppler-$POPPLER_VERSION.tar.xz
+
+topic "Installing Poppler $POPPLER_VERSION"
+
+# installation
+cd "poppler-$POPPLER_VERSION"
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$POPPLER_BUILD_DIR -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=unmaintained | indent
+make | indent
+make install | indent
+
+# write profile script
+mkdir -p "$BUILD_DIR/.profile.d"
+cp "$BUILDPACK_DIR/extra/poppler.sh" "$BUILD_DIR/.profile.d/"
+chmod +x "$BUILD_DIR/.profile.d/poppler.sh"
