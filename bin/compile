@@ -24,11 +24,7 @@ POPPLER_VERSION="21.08.0"
 POPPLER_BUILD_DIR="$BUILD_DIR/.heroku/poppler"
 
 mkdir $POPPLER_BUILD_DIR
-
-topic "Fetching Poppler $POPPLER_VERSION"
-
-curl -sL -O https://poppler.freedesktop.org/poppler-$POPPLER_VERSION.tar.xz | indent
-tar -xf poppler-$POPPLER_VERSION.tar.xz
+tar -xf $BUILDPACK_DIR/archive/poppler-$POPPLER_VERSION.tar.xz --directory $BUILDPACK_DIR
 
 topic "Installing Poppler $POPPLER_VERSION"
 
